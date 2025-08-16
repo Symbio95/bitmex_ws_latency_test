@@ -18,6 +18,8 @@ async fn main() {
     let msg = Message::Text(subscribe_msg.into());
     writer.send(msg).await.unwrap();
 
+    let mut latency_sum: f64 = 0.0;
+    let mut latency_count = 0;
 
     while let Some(message) = reader.next().await {
             
@@ -25,12 +27,13 @@ async fn main() {
 
             let json: serde_json::Value = serde_json::from_str(message.unwrap().to_text().unwrap()).unwrap();
 
-            if let Some(quote_timestamp) = json["data"][0]["timestamp"].as_str() {
+            if json["table"] == "quote" {
+                let message_timestamp = DateTime::parse_from_rfc3339(json["data"][0]["timestamp"].as_str().unwrap()).unwrap();
+                let latency_in_ms = message_received_time.signed_duration_since(message_timestamp).num_microseconds().unwrap() as f64 / 1000.0;
 
-                let message_timestamp = DateTime::parse_from_rfc3339(quote_timestamp).unwrap();
-                let latency_in_ms = message_received_time.signed_duration_since(message_timestamp).num_milliseconds();
-
-                println!("Latency: {} ms", latency_in_ms);
+                latency_count += 1;
+                latency_sum += latency_in_ms;
+                println!("average latency: {:.3} ms", latency_sum / latency_count as f64);
             }
         }
         
