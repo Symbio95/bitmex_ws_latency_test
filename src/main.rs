@@ -36,8 +36,11 @@ async fn main() {
                         latency_count += 1;
                         latency_sum += latency_in_ms;
                         println!("{} average: {:.3} ms", latency_in_ms, latency_sum / latency_count as f64);
-                    } else {
-                        println!("{} latency too high", latency_in_ms);
+                    }
+
+                    if latency_count > 1000 {
+                        latency_count = 0;
+                        latency_sum = 0.0;
                     }
             }
         }
