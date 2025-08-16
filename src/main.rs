@@ -21,6 +21,9 @@ async fn main() {
     while let Some(_) = reader.next().await {
             let latency = Utc::now().signed_duration_since(start).num_microseconds().unwrap() as f64 / 1000.0;
             
+            if latency > 10.0 {
+                continue;
+            }
             latency_sum += latency;
             latency_count += 1;
 
