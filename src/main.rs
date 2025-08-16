@@ -18,7 +18,7 @@ async fn main() {
     writer.send(Message::Ping("ping".into())).await.unwrap();
 
     let mut start = Utc::now();
-    while let Some(msg) = reader.next().await {
+    while let Some(_msg) = reader.next().await {
             let latency = Utc::now().signed_duration_since(start).num_microseconds().unwrap() as f64 / 1000.0;
 
 
@@ -30,7 +30,7 @@ async fn main() {
                 latency_sum += latency;
                 latency_count += 1;
 
-                println!("latency: {:.3}", latency_sum / latency_count as f64);
+                println!("latency: {:.3} avg: {:.3}", latency, latency_sum / latency_count as f64);
                 writer.send(Message::Ping("ping".into())).await.unwrap();
                 start = Utc::now();
             }
