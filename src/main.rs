@@ -13,36 +13,18 @@ async fn main() {
     // split the websocket stream into a writer and a reader
     let (mut writer, mut reader) = ws_stream.split();
 
-    // subscribe to the XBTUSD quote
-    let subscribe_msg = r#"{"op": "subscribe", "args": ["quote:XBTUSD"]}"#;
-    let msg = Message::Text(subscribe_msg.into());
-    writer.send(msg).await.unwrap();
-
     let mut latency_sum: f64 = 0.0;
     let mut latency_count = 0;
 
-    while let Some(message) = reader.next().await {
+    writer.send(Message::Ping("ping".into())).await.unwrap();
+
+    let mut start = Utc::now();
+    while let Some(_) = reader.next().await {
+            let latency = Utc::now().signed_duration_since(start).num_milliseconds() as f64;
+            println!("latency: {:?}", latency);
             
-            let message_received_time = Utc::now();
-
-            let json: serde_json::Value = serde_json::from_str(message.unwrap().to_text().unwrap()).unwrap();
-
-            if json["table"] == "quote" {
-                let message_timestamp = DateTime::parse_from_rfc3339(json["data"][0]["timestamp"].as_str().unwrap()).unwrap();
-                let latency_in_ms = message_received_time.signed_duration_since(message_timestamp).num_microseconds().unwrap() as f64 / 1000.0;
-
-                    // ignore outliers
-                    if latency_in_ms < 10.0 {
-                        latency_count += 1;
-                        latency_sum += latency_in_ms;
-                        println!("{} average: {:.3} ms", latency_in_ms, latency_sum / latency_count as f64);
-                    }
-
-                    if latency_count > 1000 {
-                        latency_count = 0;
-                        latency_sum = 0.0;
-                    }
-            }
+            writer.send(Message::Ping("ping".into())).await.unwrap();
+            start = Utc::now();
         }
         
 }
