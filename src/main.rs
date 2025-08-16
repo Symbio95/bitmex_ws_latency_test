@@ -12,9 +12,6 @@ async fn main() {
     // split the websocket stream into a writer and a reader
     let (mut writer, mut reader) = ws_stream.split();
 
-    let mut latency_sum: f64 = 0.0;
-    let mut latency_count = 0;
-
     writer.send(Message::Ping("ping".into())).await.unwrap();
 
     let mut start = Utc::now();
