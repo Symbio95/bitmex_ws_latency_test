@@ -32,7 +32,7 @@ async fn main() {
                 let latency_in_ms = message_received_time.signed_duration_since(message_timestamp).num_microseconds().unwrap() as f64 / 1000.0;
 
                     // ignore outliers
-                    if latency_in_ms < 20.0 {
+                    if latency_in_ms < 10.0 {
                         latency_count += 1;
                         latency_sum += latency_in_ms;
                         println!("{} average: {:.3} ms", latency_in_ms, latency_sum / latency_count as f64);
