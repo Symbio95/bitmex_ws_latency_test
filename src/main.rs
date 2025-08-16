@@ -18,9 +18,9 @@ async fn main() {
     let msg = Message::Text(subscribe_msg.into());
     writer.send(msg).await.unwrap();
 
-    let mut latency_sum: f64 = 0.0;
-    let mut latency_count = 0;
+    let mut latency_list: Vec<f64> = Vec::new();
 
+    let mut latency_count = 0;
     while let Some(message) = reader.next().await {
             
             let message_received_time = Utc::now();
@@ -34,8 +34,12 @@ async fn main() {
                     // ignore outliers
                     if latency_in_ms < 10.0 {
                         latency_count += 1;
-                        latency_sum += latency_in_ms;
-                        println!("{} average: {:.3} ms", latency_in_ms, latency_sum / latency_count as f64);
+
+                        latency_list.push(latency_in_ms);
+                        if latency_list.len() > 1000 {
+                            latency_list.remove(0); // Remove the oldest value
+                        }
+                        println!("{} average: {:.3} ms", latency_in_ms, latency_list.iter().copied().sum::<f64>() / latency_count as f64);
                     } else {
                         println!("{} latency too high", latency_in_ms);
                     }
