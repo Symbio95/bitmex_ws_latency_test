@@ -24,6 +24,8 @@ async fn main() {
             println!("latency: {:.3} ms", latency);
 
             if latency > 10.0 {
+                writer.send(Message::Ping("ping".into())).await.unwrap();
+                start = Utc::now();
                 continue;
             }
             latency_sum += latency;
