@@ -1,7 +1,6 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 use futures_util::{StreamExt, SinkExt};
-use serde_json;
 
 /// Code to test latency on bitmex.com's websocket for deploying on different server setups
 #[tokio::main]
@@ -22,7 +21,7 @@ async fn main() {
     while let Some(_) = reader.next().await {
             let latency = Utc::now().signed_duration_since(start).num_milliseconds() as f64;
             println!("latency: {:?}", latency);
-            
+
             writer.send(Message::Ping("ping".into())).await.unwrap();
             start = Utc::now();
         }
