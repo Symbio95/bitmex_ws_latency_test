@@ -21,16 +21,9 @@ async fn main() {
     let mut latency_sum: f64 = 0.0;
     let mut latency_count = 0;
 
-    let mut is_first = true;
     while let Some(message) = reader.next().await {
             
             let message_received_time = Utc::now();
-
-            // first message is laggy, ignore it
-            if is_first {
-                is_first = false;
-                continue;
-            }
 
             let json: serde_json::Value = serde_json::from_str(message.unwrap().to_text().unwrap()).unwrap();
 
@@ -38,10 +31,14 @@ async fn main() {
                 let message_timestamp = DateTime::parse_from_rfc3339(json["data"][0]["timestamp"].as_str().unwrap()).unwrap();
                 let latency_in_ms = message_received_time.signed_duration_since(message_timestamp).num_microseconds().unwrap() as f64 / 1000.0;
 
-                    latency_count += 1;
-                    latency_sum += latency_in_ms;
-                    println!("{} average: {:.3} ms", latency_in_ms, latency_sum / latency_count as f64);
-                
+                    // ignore outliers
+                    if latency_in_ms < 20.0 {
+                        latency_count += 1;
+                        latency_sum += latency_in_ms;
+                        println!("{} average: {:.3} ms", latency_in_ms, latency_sum / latency_count as f64);
+                    } else {
+                        println!("{} latency too high", latency_in_ms);
+                    }
             }
         }
         
