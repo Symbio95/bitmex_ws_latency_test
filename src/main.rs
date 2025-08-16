@@ -1,5 +1,4 @@
 use chrono::{DateTime, Utc};
-use tokio::fs::read;
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 use futures_util::{StreamExt, SinkExt};
 use serde_json;
