@@ -33,7 +33,7 @@ async fn main() {
 
                 latency_count += 1;
                 latency_sum += latency_in_ms;
-                println!("average latency: {:.3} ms", latency_sum / latency_count as f64);
+                println!("{} average: {:.3} ms", latency_in_ms, latency_sum / latency_count as f64);
             }
         }
         
