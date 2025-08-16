@@ -24,11 +24,6 @@ async fn main() {
             latency_sum += latency;
             latency_count += 1;
 
-            if latency_count > 50 {
-                latency_count =0;
-                latency_sum = 0.0;
-            }
-
             println!("latency: {:.3}", latency_sum / latency_count as f64);
             writer.send(Message::Ping("ping".into())).await.unwrap();
             start = Utc::now();
