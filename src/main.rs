@@ -12,13 +12,24 @@ async fn main() {
     // split the websocket stream into a writer and a reader
     let (mut writer, mut reader) = ws_stream.split();
 
+    let mut latency_sum: f64 = 0.0;
+    let mut latency_count = 0;
+
     writer.send(Message::Ping("ping".into())).await.unwrap();
 
     let mut start = Utc::now();
     while let Some(_) = reader.next().await {
-            let latency = Utc::now().signed_duration_since(start).num_milliseconds() as f64;
-            println!("latency: {:?}", latency);
+            let latency = Utc::now().signed_duration_since(start).num_microseconds().unwrap() as f64 / 1000.0;
+            
+            latency_sum += latency;
+            latency_count += 1;
 
+            if latency_count > 50 {
+                latency_count =0;
+                latency_sum = 0.0;
+            }
+
+            println!("latency: {:.3}", latency_sum / latency_count as f64);
             writer.send(Message::Ping("ping".into())).await.unwrap();
             start = Utc::now();
         }
