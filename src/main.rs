@@ -15,25 +15,23 @@ async fn main() {
     let mut latency_sum: f64 = 0.0;
     let mut latency_count = 0;
 
-    writer.send(Message::Ping("ping".into())).await.unwrap();
+    writer.send(Message::Text(r#"{"op": "subscribe", "args": ["quote:XBTUSD"]}"#.into())).await.unwrap();
+    let start = Utc::now();
 
-    let mut start = Utc::now();
-    while let Some(_msg) = reader.next().await {
-            let latency = Utc::now().signed_duration_since(start).num_microseconds().unwrap() as f64 / 1000.0;
+    while let Some(msg) = reader.next().await {
+            let json_data: serde_json::Value = serde_json::from_str(&msg.unwrap().to_string()).unwrap();
 
-
-            if latency > 10.0 {
-                writer.send(Message::Ping("ping".into())).await.unwrap();
-                start = Utc::now();
-                continue;
-            } else {
-                latency_sum += latency;
-                latency_count += 1;
-
-                println!("latency: {:.3} avg: {:.3}", latency, latency_sum / latency_count as f64);
-                writer.send(Message::Ping("ping".into())).await.unwrap();
-                start = Utc::now();
+            if let Some(latency: serde_json::Value) = json_data.get("data").unwrap() {
+                println!("{}", latency);
             }
+    
+
+
+            // println!("latency: {:.3} avg: {:.3}", latency, latency_sum / latency_count as f64);
+            // latency_sum += latency;
+            // latency_count += 1;
+            // writer.send(Message::Ping("ping".into())).await.unwrap();
+            // start = Utc::now();
         }
         
 }
